@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="uz">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Kassir paneli</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 20px;
+      }
+      h2 {
+        margin-bottom: 10px;
+      }
+      select,
+      button,
+      input {
+        margin: 5px;
+        padding: 5px;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-top: 20px;
+      }
+      th,
+      td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        text-align: center;
+      }
+      th {
+        background: #f4f4f4;
+      }
+      .qty-btn {
+        padding: 2px 8px;
+      }
+      #total {
+        margin-top: 15px;
+        font-weight: bold;
+        font-size: 18px;
+        text-align: right;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>💰 Kassir paneli</h2>
+
+    <label>Filialni tanlang: </label>
+    <select id="branch">
+      <option value="">--Tanlang--</option>
+      <option value="316eed6f-6c55-40b4-9932-00dfeb33c629">
+        Samarqand filial
+      </option>
+      <option value="c0228faa-2ac8-43b4-b481-2f0507599d91">
+        Chorsu filial
+      </option>
+      <option value="5d13aeb2-b396-4c02-b55f-0eb51fff8e60">
+        Toshkent filial
+      </option>
+      <option value="8e2b16d2-82f5-4e59-918c-7e8d1aa43d10">
+        Buxoro filial
+      </option>
+      <option value="a82b8394-f301-4f9f-872a-66aa3a62a5f2">
+        Andijon filial
+      </option>
+    </select>
+
+    <h3>Mahsulot qo‘shish</h3>
+    <select id="product">
+      <option value="">--Tanlang--</option>
+      <option value="bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb001">
+        Pizza Margarita
+      </option>
+      <option value="bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb002">
+        Pizza Pepperoni
+      </option>
+      <option value="bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb003">Hot Dog</option>
+      <option value="bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb004">Burger</option>
+      <option value="bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb005">Sho‘rva</option>
+      <option value="bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb006">Osh</option>
+      <option value="bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb007">
+        Sabzavot salati
+      </option>
+      <option value="bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb008">
+        Kartoshka fri
+      </option>
+      <option value="bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb009">Cola 1L</option>
+      <option value="bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb010">Choy</option>
+      <option value="bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb011">
+        Pizza Quattro Formaggi
+      </option>
+      <option value="bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb012">
+        Pizza Vegetariana
+      </option>
+      <option value="bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb013">Lavash</option>
+      <option value="bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb014">Donar</option>
+      <option value="bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb015">Lag‘mon</option>
+      <option value="bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb016">Somsa</option>
+      <option value="bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb017">Shashlik</option>
+      <option value="bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb018">Kompot</option>
+      <option value="bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb019">Pepsi 1L</option>
+      <option value="bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb020">Fanta 1L</option>
+    </select>
+    <button id="addBtn">Qo‘shish</button>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Mahsulot</th>
+          <th>Narx (so‘m)</th>
+          <th>Miqdor</th>
+          <th>Summa</th>
+          <th>O'chirish</th>
+        </tr>
+      </thead>
+      <tbody id="cart"></tbody>
+    </table>
+
+    <div id="total">Jami: 0 so‘m</div>
+
+    <button id="submitBtn">✅ Sotish</button>
+
+    <script>
+      const branchSelect = document.getElementById("branch");
+      const productSelect = document.getElementById("product");
+      const addBtn = document.getElementById("addBtn");
+      const cartBody = document.getElementById("cart");
+      const submitBtn = document.getElementById("submitBtn");
+      const totalDiv = document.getElementById("total");
+
+      const products = {
+        "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb001": { name: "Pizza Margarita", price: 96000 },
+        "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb002": { name: "Pizza Pepperoni", price: 110000 },
+        "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb003": { name: "Hot Dog", price: 48000 },
+        "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb004": { name: "Burger", price: 65000 },
+        "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb005": { name: "Sho‘rva", price: 30000 },
+        "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb006": { name: "Osh", price: 72000 },
+        "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb007": { name: "Sabzavot salati", price: 20000 },
+        "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb008": { name: "Kartoshka fri", price: 15000 },
+        "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb009": { name: "Cola 1L", price: 35000 },
+        "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb010": { name: "Choy", price: 5000 },
+        "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb011": { name: "Pizza Quattro Formaggi", price: 125000 },
+        "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb012": { name: "Pizza Vegetariana", price: 105000 },
+        "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb013": { name: "Lavash", price: 40000 },
+        "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb014": { name: "Donar", price: 45000 },
+        "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb015": { name: "Lag‘mon", price: 38000 },
+        "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb016": { name: "Somsa", price: 12000 },
+        "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb017": { name: "Shashlik", price: 25000 },
+        "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb018": { name: "Kompot", price: 8000 },
+        "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb019": { name: "Pepsi 1L", price: 32000 },
+        "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb020": { name: "Fanta 1L", price: 32000 },
+      };
+
+      let cart = {};
+
+      addBtn.addEventListener("click", () => {
+        const pid = productSelect.value;
+        if (!pid) return alert("Mahsulotni tanlang!");
+        if (!cart[pid]) {
+          cart[pid] = { name: products[pid].name, price: products[pid].price, qty: 1 };
+        } else {
+          cart[pid].qty++;
+        }
+        renderCart();
+      });
+
+      function renderCart() {
+        cartBody.innerHTML = "";
+        let total = 0;
+
+        Object.entries(cart).forEach(([pid, item]) => {
+          const summa = item.price * item.qty;
+          total += summa;
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${item.name}</td>
+            <td>${item.price.toLocaleString()} so‘m</td>
+            <td>
+              <button class="qty-btn" onclick="decreaseQty('${pid}')">-</button>
+              ${item.qty}
+              <button class="qty-btn" onclick="increaseQty('${pid}')">+</button>
+            </td>
+            <td>${summa.toLocaleString()} so‘m</td>
+            <td><button onclick="removeItem('${pid}')">❌</button></td>
+          `;
+          cartBody.appendChild(tr);
+        });
+
+        totalDiv.textContent = `Jami: ${total.toLocaleString()} so‘m`;
+      }
+
+      function increaseQty(pid) {
+        cart[pid].qty++;
+        renderCart();
+      }
+
+      function decreaseQty(pid) {
+        if (cart[pid].qty > 1) {
+          cart[pid].qty--;
+        } else {
+          delete cart[pid];
+        }
+        renderCart();
+      }
+
+      function removeItem(pid) {
+        delete cart[pid];
+        renderCart();
+      }
+
+      submitBtn.addEventListener("click", async () => {
+        const branch_id = branchSelect.value;
+        if (!branch_id) return alert("Filialni tanlang!");
+        if (Object.keys(cart).length === 0) return alert("Savatcha bo‘sh!");
+
+        const payload = {
+          branch_id,
+          movement_type: "OUT",
+          products: Object.entries(cart).map(([pid, item]) => ({
+            product_id: pid,
+            qty: item.qty,
+          })),
+        };
+
+        console.log("📤 Kassirdan yuborilayotgan payload:", payload);
+
+        try {
+          const res = await fetch("http://localhost:5000/api/movements", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+
+          if (!res.ok) {
+            const errText = await res.text();
+            console.error("❌ Server error:", res.status, errText);
+            alert("❌ Server xatosi: " + res.status);
+            return;
+          }
+
+          const data = await res.json();
+          console.log("✅ Success:", data);
+          alert("✅ Sotildi va oshpazga yuborildi!");
+          cart = {};
+          renderCart();
+        } catch (error) {
+          console.log("myerror (network-level)", error);
+          alert("❌ Server xatosi (serverga ulanib bo‘lmadi)");
+        }
+      });
+    </script>
+  </body>
+</html>

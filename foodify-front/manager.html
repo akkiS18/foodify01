@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="uz">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Menejer paneli</title>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 20px;
+      }
+      select,
+      table,
+      button {
+        margin: 10px 0;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      th,
+      td {
+        border: 1px solid #ccc;
+        padding: 8px;
+      }
+      th {
+        background: #f4f4f4;
+      }
+      .update {
+        background: #e6f7ff;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>📊 Menejer paneli</h2>
+
+    <label>Filialni tanlang: </label>
+    <select id="branch">
+      <option value="">--Tanlang--</option>
+      <option value="316eed6f-6c55-40b4-9932-00dfeb33c629">
+        Samarqand filial
+      </option>
+      <option value="c0228faa-2ac8-43b4-b481-2f0507599d91">
+        Chorsu filial
+      </option>
+      <option value="5d13aeb2-b396-4c02-b55f-0eb51fff8e60">
+        Toshkent filial
+      </option>
+      <option value="8e2b16d2-82f5-4e59-918c-7e8d1aa43d10">
+        Buxoro filial
+      </option>
+      <option value="a82b8394-f301-4f9f-872a-66aa3a62a5f2">
+        Andijon filial
+      </option>
+    </select>
+    <button id="load">Qoldiqni ko‘rish</button>
+
+    <h3>Ombor qoldiqlari</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Ingredient</th>
+          <th>Qty</th>
+        </tr>
+      </thead>
+      <tbody id="stock"></tbody>
+    </table>
+
+    <script>
+      const socket = io("http://localhost:5000", { withCredentials: true });
+      const branchSelect = document.getElementById("branch");
+      const stockTable = document.getElementById("stock");
+      const loadBtn = document.getElementById("load");
+
+      let currentBranch = null;
+
+      loadBtn.addEventListener("click", async () => {
+        const b = branchSelect.value;
+        if (!b) return alert("Filial tanlang!");
+        currentBranch = b;
+
+        // Filialga join
+        socket.emit("join", { branches: [b] });
+
+        // API’dan qoldiqni olish
+        const res = await fetch(
+          `http://localhost:5000/api/stock?branch_id=${b}`
+        );
+        const data = await res.json();
+
+        renderStock(data.data);
+      });
+
+      function renderStock(items) {
+        stockTable.innerHTML = "";
+        items.forEach((item) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `<td>${item.ingredient_name}</td><td>${
+            item.qty
+          }</td>`;
+          stockTable.appendChild(tr);
+        });
+      }
+
+      // Real-time update
+      socket.on("order:new", async (order) => {
+        if (order.branch_id === currentBranch) {
+          const res = await fetch(
+            `http://localhost:5000/api/stock?branch_id=${currentBranch}`
+          );
+          const data = await res.json();
+          renderStock(data.data);
+        }
+      });
+    </script>
+  </body>
+</html>

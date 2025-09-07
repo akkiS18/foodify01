@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="uz">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Oshpaz paneli</title>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 20px;
+      }
+      select,
+      table {
+        margin: 10px 0;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      th,
+      td {
+        border: 1px solid #ccc;
+        padding: 8px;
+      }
+      th {
+        background: #f4f4f4;
+      }
+      .new {
+        background: #e0ffe0;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>🍳 Oshpaz paneli</h2>
+
+    <label>Filialni tanlang: </label>
+    <select id="branch">
+      <option value="">--Tanlang--</option>
+      <option value="316eed6f-6c55-40b4-9932-00dfeb33c629">
+        Samarqand filial
+      </option>
+      <option value="c0228faa-2ac8-43b4-b481-2f0507599d91">
+        Chorsu filial
+      </option>
+      <option value="5d13aeb2-b396-4c02-b55f-0eb51fff8e60">
+        Toshkent filial
+      </option>
+      <option value="8e2b16d2-82f5-4e59-918c-7e8d1aa43d10">
+        Buxoro filial
+      </option>
+      <option value="a82b8394-f301-4f9f-872a-66aa3a62a5f2">
+        Andijon filial
+      </option>
+    </select>
+
+    <h3>Buyurtmalar</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Vaqt</th>
+          <th>Mahsulot</th>
+          <th>Miqdor</th>
+        </tr>
+      </thead>
+      <tbody id="orders"></tbody>
+    </table>
+
+    <script>
+      const socket = io("http://localhost:5000", { withCredentials: true });
+      const branchSelect = document.getElementById("branch");
+      const ordersTable = document.getElementById("orders");
+
+      let currentBranch = null;
+
+      branchSelect.addEventListener("change", () => {
+        const newBranch = branchSelect.value;
+        if (currentBranch) {
+          socket.emit("leave", { branches: [currentBranch] });
+        }
+        if (newBranch) {
+          socket.emit("join", { branches: [newBranch] });
+          currentBranch = newBranch;
+        }
+      });
+
+      // faqat productlar chiqadi
+      socket.on("order:new", (data) => {
+        console.log("🔔 New order", data);
+        const tr = document.createElement("tr");
+        tr.classList.add("new");
+        tr.innerHTML = `
+        <td>${new Date(data.created_at).toLocaleTimeString()}</td>
+        <td>${data.product_name}</td>
+        <td>${data.qty}</td>
+      `;
+        ordersTable.prepend(tr);
+      });
+    </script>
+  </body>
+</html>
